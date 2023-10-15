@@ -14,29 +14,29 @@ select acc.account_id,
  coalesce(transaction_amount.mean_value, 0) as mean_value
 from teste_itau.customer  as cust
 left join teste_itau.account as acc
-on acc.customer_id = cust.customer_id 
+	on acc.customer_id = cust.customer_id 
 left join (
-select account_id, dt, 'bankslip' as transaction_type, avg(amount) as mean_value
-from teste_itau.bankslip
-group by account_id, dt, transaction_type
-union
-select account_id, dt, transaction_type, avg(amount) as mean_value
-from
-(select account_id_destination as account_id, dt, 'p2p' as transaction_type, amount
-from teste_itau.p2p_tef
-union
-select account_id_source as account_id, dt, 'p2p' as transaction_type, amount 
-from teste_itau.p2p_tef) p2p
-group by  account_id, dt, transaction_type
-union
-select account_id, dt, transaction_type, avg(amount) as mean_value
-from
-(select account_id as account_id, dt, 'pix' as transaction_type, amount
-from teste_itau.pix_send
-union
-select account_id as account_id, dt, 'pix' as transaction_type, amount 
-from teste_itau.pix_received) pix
-group by  account_id, dt, transaction_type
+	select account_id, dt, 'bankslip' as transaction_type, avg(amount) as mean_value
+	from teste_itau.bankslip
+	group by account_id, dt, transaction_type
+	union
+	select account_id, dt, transaction_type, avg(amount) as mean_value
+	from (
+			select account_id_destination as account_id, dt, 'p2p' as transaction_type, amount
+			from teste_itau.p2p_tef
+			union
+			select account_id_source as account_id, dt, 'p2p' as transaction_type, amount 
+			from teste_itau.p2p_tef) p2p
+		   group by  account_id, dt, transaction_type
+	union
+	select account_id, dt, transaction_type, avg(amount) as mean_value
+	from (
+		select account_id as account_id, dt, 'pix' as transaction_type, amount
+		from teste_itau.pix_send
+		union
+		select account_id as account_id, dt, 'pix' as transaction_type, amount 
+		from teste_itau.pix_received) pix
+	group by  account_id, dt, transaction_type
 ) transaction_amount
 on acc.account_id  = transaction_amount.account_id
 and acc.dt = transaction_amount.dt 
